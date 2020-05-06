@@ -1,0 +1,11 @@
+cvlib
+pandas
+matplotlib
+tensorflow
+tensorflow-gpu
+keras
+numpy
+opencv-python
+sklearn
+h5py
+imageai
