@@ -52,6 +52,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+from datetime import datetime
 
 dataFrame = pd.read_csv('../data/dataOp1.csv')
 x_init = dataFrame.iloc[:, :-1].values
@@ -125,3 +127,17 @@ plt.text(  # position text relative to Axes
     transform=ax.transAxes
 )
 plt.show()
+
+
+def predict_clearance_time(vehicles):
+    global regressor
+
+    curr_time = datetime.now()
+    timestamp = curr_time.hour * 12 + curr_time.minute//5
+    ip = [vehicles]
+    l = [1 if x == timestamp else 0 for x in range(24*12)]
+    ip.extend(l)
+    ip_array = np.array(ip)
+    ip_array = ip_array.reshape(1, len(ip))
+    op = regressor.predict(ip_array)
+    return op[0]

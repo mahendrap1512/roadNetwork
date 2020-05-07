@@ -1,11 +1,11 @@
 import asyncio
-import time
-import cv2
-import datetime
-import numpy as np
 import csv
+import datetime
 import random
+import time
 
+import cv2
+import numpy as np
 
 modelConfiguration = "darknet/cfg/yolov3.cfg"
 modelWeights = "darknet/yolov3.weights"
@@ -22,7 +22,8 @@ outputlayers = [layer_names[i[0] - 1] for i in yolo_net.getUnconnectedOutLayers(
 colors = np.random.uniform(0, 255, size=(len(labels), 3))
 font = cv2.FONT_HERSHEY_PLAIN
 
-vehicle_counts = [0, 0, 0, 0]
+
+vehicle_counts = [0, 0]
 
 
 async def object_detection(cap, img):
@@ -83,8 +84,8 @@ async def object_detection(cap, img):
                 cv2.putText(frame, label + " " + str(round(confidence, 2)), (x, y + 30), font, 1, (255, 255, 255), 2)
 
         elapsed_time = time.time() - starting_time
-        fps = frame_id / elapsed_time
-        cv2.putText(frame, "FPS:" + str(round(fps, 2)), (10, 50), font, 2, (0, 0, 0), 1)
+        # fps = frame_id / elapsed_time
+        # cv2.putText(frame, "FPS:" + str(round(fps, 2)), (10, 50), font, 2, (0, 0, 0), 1)
 
         cv2.imshow(img, frame)
         key = cv2.waitKey(1)  # wait 1ms the loop will start again and we will process the next frame
@@ -94,20 +95,20 @@ async def object_detection(cap, img):
 
 
 async def manager():
-    cap1 = cv2.VideoCapture("roadTraffic.mp4")
+    cap1 = cv2.VideoCapture("video1.webm")
     cap1.set(3, 160)
     cap1.set(4, 120)
-    cap2 = cv2.VideoCapture("roadTraffic.mp4")
+    cap2 = cv2.VideoCapture("video2.mp4")
     cap2.set(3, 160)
     cap2.set(4, 120)
-    cap3 = cv2.VideoCapture("roadTraffic.mp4")
-    cap3.set(3, 160)
-    cap3.set(4, 120)
-    cap4 = cv2.VideoCapture("roadTraffic.mp4")
-    cap4.set(3, 160)
-    cap4.set(4, 120)
-    await asyncio.gather(object_detection(cap1, "image1"), object_detection(cap2, "image2"),
-                         object_detection(cap3, "image3"), object_detection(cap4, "image4"))
+    # cap3 = cv2.VideoCapture("roadTraffic.mp4")
+    # cap3.set(3, 160)
+    # cap3.set(4, 120)
+    # cap4 = cv2.VideoCapture("roadTraffic.mp4")
+    # cap4.set(3, 160)
+    # cap4.set(4, 120)
+    await asyncio.gather(object_detection(cap1, "image1"),
+                         object_detection(cap2, "image2",))
 
     # while True:
     #     _, frame1 = cap1.read()
@@ -135,6 +136,6 @@ if __name__ == "__main__":
     safe = random.randint(0, 1)
     fileptr = open("./data/collectedData.csv", "a")
     file = csv.writer(fileptr)
-    file.writerow([vehicle_counts[0], start_time, end_time, end_time-start_time, safe])
+    file.writerow([vehicle_counts[0], start_time, end_time, end_time - start_time, safe])
     fileptr.close()
     cv2.destroyAllWindows()
