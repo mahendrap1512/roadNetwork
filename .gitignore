@@ -1,2 +1,5 @@
 roadTraffic.mp4
 darknet/
+*/__pycache__/
+*.pyc
+models/__pycache__/*

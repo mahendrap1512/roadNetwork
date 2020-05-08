@@ -30,30 +30,36 @@ def make_yellow():
     cv2.imshow("canvas", image)
 
 
-def controller():
+def light_controller(duration, jam):
     global image
-    a = 10
-    cv2.putText(image, "STOP", (160, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
-    make_red()
-    while a > 0:
-        cv2.waitKey(1000)
-        a -= 1
-        if a <= 5:
+    a = duration
+    if jam:
+        cv2.putText(image, "STOP", (160, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+        make_red()
+        while a > 0:
+            cv2.waitKey(1000)
+            a -= 1
             text = str(a)
-            image = cv2.rectangle(image, (150, 250), (250, 320), (0, 0, 0), -1)
-            image = cv2.rectangle(image, (150, 250), (250, 320), (255, 255, 255), 2)
-            cv2.putText(image, text, (180, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
-            make_yellow()
+            if a > 5:
+                image = cv2.rectangle(image, (150, 250), (250, 320), (0, 0, 0), -1)
+                image = cv2.rectangle(image, (150, 250), (250, 320), (255, 255, 255), 2)
+                cv2.putText(image, text, (180, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
+                make_red()
+            elif a <= 5:
+                image = cv2.rectangle(image, (150, 250), (250, 320), (0, 0, 0), -1)
+                image = cv2.rectangle(image, (150, 250), (250, 320), (255, 255, 255), 2)
+                cv2.putText(image, text, (180, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
+                make_yellow()
+        image = cv2.rectangle(image, (150, 250), (250, 320), (0, 0, 0), -1)
+        image = cv2.rectangle(image, (150, 250), (250, 320), (255, 255, 255), 2)
+        cv2.putText(image, "GO", (180, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+        make_green()
+    else:
+        cv2.putText(image, "GO", (160, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+        make_green()
 
-    image = cv2.rectangle(image, (150, 250), (250, 320), (0, 0, 0), -1)
-    image = cv2.rectangle(image, (150, 250), (250, 320), (255, 255, 255), 2)
-    cv2.putText(image, "GO", (180, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
-    make_green()
 
-    pass
-
-
-controller()
+# controller(duration=20, jam=True)
 key = cv2.waitKey(0)
 try:
     if key == 27:

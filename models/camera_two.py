@@ -3,7 +3,7 @@ from multiprocessing import Process, Pipe
 vehicles_count = 0
 
 
-def fun(child_conn):
+def camera2(child_conn):
     global vehicles_count
     # msg = "Hello"
     # child_conn.send(msg)
@@ -107,7 +107,7 @@ def fun(child_conn):
 
         current_time = datetime.datetime.now()
         time_elapsed = (current_time - starting_time).seconds
-        if time_elapsed % 60 == 0:
+        if time_elapsed % 10 == 0:
             child_conn.send(vehicles_count)
             pass
 

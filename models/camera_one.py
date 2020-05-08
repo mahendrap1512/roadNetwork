@@ -5,7 +5,7 @@ from multiprocessing import Process, Pipe
 vehicles_count = 0
 
 
-def fun(child_conn):
+def camera1(child_conn):
     global vehicles_count
     # msg = "Hello"
     # child_conn.send(msg)
