@@ -1,6 +1,14 @@
-from multiprocessing import Process, Pipe
+from datetime import datetime
 
 vehicles_count = 0
+
+
+def one_second_wait():
+    temporary_start = datetime.now()
+    while True:
+        temporary_end = datetime.now()
+        if (temporary_end - temporary_start).seconds >= 1:
+            break
 
 
 def camera2(child_conn):
@@ -10,8 +18,18 @@ def camera2(child_conn):
 
     import cv2
     import numpy as np
-    import time
     import datetime
+
+    roi = 480
+    offset = 5
+    detect = []
+
+    def vehicle_center(x_vehicle, y_vehicle, w_vehicle, h_vehicle):
+        x1 = int(w / 2)
+        y1 = int(h / 2)
+        cx = x_vehicle + x1
+        cy = y + y1
+        return cx, cy
 
     # _net_cfg_path = "/home/mahendra/PycharmProjects/roadNetwork/darknet/cfg/yolo.cfg"
 
@@ -30,7 +48,7 @@ def camera2(child_conn):
     colors = np.random.uniform(0, 255, size=(len(labels), 3))
 
     # loading image
-    cap = cv2.VideoCapture("../video1.webm")  # for web-cam use 0, else file name
+    cap = cv2.VideoCapture("../Traffic1.mp4")  # for web-cam use 0, else file name
     font = cv2.FONT_HERSHEY_PLAIN
     starting_time = datetime.datetime.now()
     frame_id = 0
@@ -40,6 +58,7 @@ def camera2(child_conn):
         _, frame = cap.read()  #
         frame_id += 1
         height, width, channels = frame.shape
+        cv2.line(frame, (769, roi), (1298, roi), (255, 0, 0), 3)
         # detecting objects
         blob = cv2.dnn.blobFromImage(frame, 0.00392, (320, 320), (0, 0, 0), True, crop=False)  # reduce 416 to 320
 
@@ -69,11 +88,19 @@ def camera2(child_conn):
                     y = int(center_y - h / 2)
                     # cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
                     # print("y_center is : ", center_y)
-                    if class_id in vehicle_ids and 250 < center_y < 256:
-                        vehicles_count += 1
-                        pass
+
+                    # if class_id in vehicle_ids and 580 < center_y < 587:
+                    #     vehicles_count += 1
+                    #     pass
 
                     boxes.append([x, y, w, h])  # put all rectangle areas
+                    detect.append(vehicle_center(x, y, w, h))
+                    for (x, y) in detect:
+                        if (roi + offset) > y > (roi - offset):
+                            vehicles_count += 1
+                            # print(counter)
+                            # cv2.line(frame, (769, roi), (1298, roi), (0, 0, 255), 3)
+                            detect.remove((x, y))
                     confidences.append(
                         float(confidence))  # how confidence was that object detected and show that percentage
                     class_ids.append(class_id)  # name of the object tha was detected
@@ -109,9 +136,13 @@ def camera2(child_conn):
         time_elapsed = (current_time - starting_time).seconds
         if time_elapsed % 10 == 0:
             child_conn.send(vehicles_count)
+            # print(counter)
+            one_second_wait()
             pass
 
     cap.release()
     cv2.destroyAllWindows()
 
 
+if __name__ == '__main__':
+    camera2('')

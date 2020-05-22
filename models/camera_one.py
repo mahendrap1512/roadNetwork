@@ -1,18 +1,13 @@
-
-
-from multiprocessing import Process, Pipe
-
 vehicles_count = 0
 
 
-def camera1(child_conn):
+def camera1(child_conn_camera_1):
     global vehicles_count
     # msg = "Hello"
     # child_conn.send(msg)
 
     import cv2
     import numpy as np
-    import time
     import datetime
 
     # _net_cfg_path = "/home/mahendra/PycharmProjects/roadNetwork/darknet/cfg/yolo.cfg"
@@ -72,9 +67,8 @@ def camera1(child_conn):
                     # cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
                     # print("y_center is : ", center_y)
                     if class_id in vehicle_ids and 400 < center_y < 404:
-                        print("catch the vehicles")
+                        # print("catch the vehicles")
                         vehicles_count += 1
-                        pass
 
                     boxes.append([x, y, w, h])  # put all rectangle areas
                     confidences.append(
@@ -105,16 +99,19 @@ def camera1(child_conn):
 
         if key == 27:  # esc key stops the process
             # print(vehicles_count)
-            child_conn.close()
+            # child_conn_camera_1.close()
             break
 
         current_time = datetime.datetime.now()
         time_elapsed = (current_time - starting_time).seconds
-        if time_elapsed % 60 == 0:
-            child_conn.send(vehicles_count)
+        if time_elapsed != 0 and time_elapsed % 60 == 0:
+            child_conn_camera_1.send(vehicles_count)
+            # print(vehicles_count)
             pass
 
     cap.release()
     cv2.destroyAllWindows()
 
 
+if __name__ == '__main__':
+    camera1('')

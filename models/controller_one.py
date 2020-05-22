@@ -1,11 +1,18 @@
 from datetime import datetime
-from multiprocessing import Process, Queue, Pipe
-# from camera_one import fun, controller_2
-from models.controller_two import controller2
+from multiprocessing import Process, Pipe
+# from models.controller_two import controller2
 from models.camera_one import camera1
 import random
 import cv2
 import numpy as np
+
+
+def one_second_wait():
+    temporary_start = datetime.now()
+    while True:
+        temporary_end = datetime.now()
+        if (temporary_end - temporary_start).seconds >= 1:
+            break
 
 
 canvas = np.zeros((500, 500), dtype="uint8")
@@ -63,58 +70,69 @@ def light_controller(duration, jam):
     else:
         cv2.putText(image, "GO", (160, 290), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
         make_green()
+    key = cv2.waitKey(0)
+    try:
+        if key == 27:
+            cv2.destroyAllWindows()
+    except TypeError as e:
+        return 0
 
 
 def controller_1():
     # pipeline for camera 1
-    # parent_conn1, child_conn1 = Pipe()
-    # p1 = Process(target=camera1, args=(child_conn1,))
-    # p1.start()
+    parent_conn_camera_1, child_conn_camera_1 = Pipe()
+    p1 = Process(target=camera1, args=(child_conn_camera_1,))
+    p1.start()
     # pipeline for controller 2
-    parent_conn2, child_conn2 = Pipe()
-    p2 = Process(target=controller2(child_conn2), args=(child_conn2,))
-    p2.start()
-    print("camera 2 started")
+    # parent_conn2, child_conn2 = Pipe()
+    # p2 = Process(target=controller2, args=(child_conn2,))
+    # p2.start()
+    # print("camera 2 started")
     start_time = datetime.now()
     last_five_minute_traffic = [0, 0, 0, 0, 0]
     vehicle_count = 0
     while True:
         curr_time = datetime.now()
         time_duration = (curr_time - start_time).seconds
-        if time_duration != 0 and time_duration % 60 == 0:
+
+        # if time_duration != 0 and time_duration % 30 == 0:
+        #     camera2_info = parent_conn2.recv()
+        #     print(camera2_info)
+        #     if camera2_info.get("jam") == 1:
+        #         estimated_clearance_time = camera2_info.get("clearance_time")
+        #         # display traffic light here for clearance time
+        #         light_controller(estimated_clearance_time, True)
+
+        if time_duration != 0 and time_duration % 300 == 0:
+            start_time = datetime.now()
+            last_five_minute_traffic = [0, 0, 0, 0, 0]
+            vehicle_count = 0
+            one_second_wait()
+
+        elif time_duration != 0 and time_duration % 60 == 0:
             # change permissible traffic here
-            permissible_traffic = random.randint(40, 120)
-            # last_minute_traffic_camera_1 = parent_conn1.recv()
-            last_minute_traffic_camera_1 = random.randint(10, 30)
+            permissible_traffic = random.randint(10, 40)
+            last_minute_traffic_camera_1 = parent_conn_camera_1.recv()
+            # last_minute_traffic_camera_1 = random.randint(10, 30)
             vehicle_count -= last_five_minute_traffic[4]
             for i in range(4, 0, -1):
                 last_five_minute_traffic[i] = last_five_minute_traffic[i-1]
             last_five_minute_traffic[0] = last_minute_traffic_camera_1
             vehicle_count += last_minute_traffic_camera_1
             if vehicle_count > permissible_traffic:
-                # cool-down for 1 min
-                # display traffic light here
+                # cool-down for 1 min, display traffic light here for 1 minute
+                print("last 5 minute traffic : ", last_five_minute_traffic)
                 light_controller(60, True)
                 vehicle_count -= last_five_minute_traffic[4]
                 for i in range(4, 0, -1):
                     last_five_minute_traffic[i] = last_five_minute_traffic[i - 1]
                 last_five_minute_traffic[0] = 0
+            one_second_wait()
+            print("last 5 minute traffic : ", last_five_minute_traffic)
 
-        if time_duration % 300 == 0:
-            start_time = datetime.now()
-            last_five_minute_traffic = [0, 0, 0, 0, 0]
-            vehicle_count = 0
-            pass
-
-        if time_duration != 0 and time_duration % 30 == 0:
-            camera2_info = parent_conn2.recv()
-            print(camera2_info)
-            if camera2_info.get("jam") == 1:
-                estimated_clearance_time = camera2_info.get("clearance_time")
-                # display traffic light here for clearance time
-                light_controller(estimated_clearance_time, True)
-
-    pass
+        elif time_duration != 0 and time_duration % 10 == 0:
+            print("timer : ", time_duration)
+            one_second_wait()
 
 
 if __name__ == '__main__':

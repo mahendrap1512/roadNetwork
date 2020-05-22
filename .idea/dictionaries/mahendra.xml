@@ -4,6 +4,7 @@
       <w>crossentropy</w>
       <w>darknet</w>
       <w>dataset</w>
+      <w>dtype</w>
       <w>fileptr</w>
       <w>imshow</w>
       <w>kfolds</w>
@@ -11,9 +12,11 @@
       <w>mahendra</w>
       <w>outputlayers</w>
       <w>preprocessing</w>
+      <w>recv</w>
       <w>regressor</w>
       <w>relu</w>
       <w>uint</w>
+      <w>upto</w>
       <w>webm</w>
       <w>yolo</w>
       <w>yolov</w>
